@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bean Machine - Kasa</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>BEAN MACHINE COFFEE</h1>
+    </header>
+    <div class="container">
+        <div class="menu">
+            <h2>Menu</h2>
+            <ul id="menu-list">
+                <li data-name="Americano" data-price="200">Americano - $200</li>
+                <li data-name="Mocha" data-price="200">Mocha - $200</li>
+                <li data-name="Cappuccino" data-price="200">Cappuccino - $200</li>
+                <li data-name="Shake Karmelowy" data-price="120">Shake Karmelowy - $120</li>
+                <li data-name="Shake Truskawkowy" data-price="120">Shake Truskawkowy - $120</li>
+                <li data-name="Shake Czekoladowy" data-price="120">Shake Czekoladowy - $120</li>
+                <li data-name="Donut Czekoladowy" data-price="100">Donut Czekoladowy - $100</li>
+                <li data-name="Donut Truskawkowy" data-price="100">Donut Truskawkowy - $100</li>
+                <li data-name="Ciastko Waniliowe" data-price="150">Ciastko Waniliowe - $150</li>
+                <li data-name="Szarlotka" data-price="200">Szarlotka - $200</li>
+                <li data-name="Mleko" data-price="15">Mleko - $15</li>
+                <li data-name="Woda" data-price="10">Woda - $10</li>
+            </ul>
+        </div>
+        <div class="orders">
+            <h2>Zamówienie</h2>
+            <ul id="order-list"></ul>
+            <div class="total">
+                <strong>Total: </strong><span id="total-price">0</span> $
+            </div>
+            <button class="next-order-btn" id="next-order">Następne zamówienie</button>
+        </div>
+    </div>
+    <script>
+        const menuList = document.getElementById('menu-list');
+        const orderList = document.getElementById('order-list');
+        const totalPriceElement = document.getElementById('total-price');
+        const nextOrderButton = document.getElementById('next-order');
+
+        let totalPrice = 0;
+
+        menuList.addEventListener('click', (event) => {
+            if (event.target.tagName === 'LI') {
+                const name = event.target.dataset.name;
+                const price = parseFloat(event.target.dataset.price);
+
+                const existingOrder = document.querySelector(`[data-item-name="${name}"]`);
+                if (existingOrder) {
+                    const quantityInput = existingOrder.querySelector('.order-quantity');
+                    quantityInput.value = parseInt(quantityInput.value) + 1;
+                    updateTotalPrice(price);
+                } else {
+                    addOrderItem(name, price);
+                }
+            }
+        });
+
+        nextOrderButton.addEventListener('click', () => {
+            orderList.innerHTML = ''; // Usuwa wszystkie elementy zamówienia
+            totalPrice = 0; // Resetuje całkowitą cenę
+            totalPriceElement.textContent = totalPrice.toFixed(2);
+        });
+
+        function addOrderItem(name, price) {
+            const orderItem = document.createElement('li');
+            orderItem.dataset.itemName = name;
+
+            const itemName = document.createElement('span');
+            itemName.textContent = name;
+
+            const quantityInput = document.createElement('input');
+            quantityInput.type = 'number';
+            quantityInput.min = 1;
+            quantityInput.value = 1;
+            quantityInput.className = 'order-quantity';
+            quantityInput.addEventListener('change', (event) => {
+                const newQuantity = parseInt(event.target.value) || 1;
+                const oldQuantity = parseInt(event.target.dataset.oldQuantity || 1);
+                const difference = newQuantity - oldQuantity;
+                updateTotalPrice(price * difference);
+                event.target.dataset.oldQuantity = newQuantity;
+            });
+
+            const itemPrice = document.createElement('span');
+            itemPrice.textContent = `$${price}`;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Remove';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.addEventListener('click', () => {
+                const quantity = parseInt(quantityInput.value);
+                updateTotalPrice(-price * quantity);
+                orderItem.remove();
+            });
+
+            orderItem.appendChild(itemName);
+            orderItem.appendChild(quantityInput);
+            orderItem.appendChild(itemPrice);
+            orderItem.appendChild(deleteBtn);
+            orderList.appendChild(orderItem);
+
+            updateTotalPrice(price);
+        }
+
+        function updateTotalPrice(amount) {
+            totalPrice += amount;
+            totalPriceElement.textContent = totalPrice.toFixed(2);
+        }
+    </script>
+</body>
+</html>
